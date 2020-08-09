@@ -3,7 +3,7 @@
 ## Objectives
 - [ ] Project Setup
 
-------
+---
 
 ## Section 2: Lecture 10 - Project Setup 
 #### `Initial App Setup` Procedures
@@ -69,4 +69,4 @@ npm install -g nodemon
 1. `blog/client` which contains your react app 
 2. `posts` which contains an npm project and 4 packages installed (`cors`, `axios`, `express`, & `nodemon`)
 3. `comments` which contains an npm project and 4 packages installed (`cors`, `axios`, `express`, & `nodemon`)
-------
+---
