@@ -2,7 +2,7 @@
 
 ## Objectives
 - [ ] Project Setup
-    + issue-9
+- [ ] Create `Posts` Service
 ---
 
 ## Section 2: Lecture 10 - Project Setup 
@@ -70,3 +70,6 @@ npm install -g nodemon
 2. `posts` which contains an npm project and 4 packages installed (`cors`, `axios`, `express`, & `nodemon`)
 3. `comments` which contains an npm project and 4 packages installed (`cors`, `axios`, `express`, & `nodemon`)
 ---
+
+## Section 2: Lecture 11 - `Posts` Service Creation
+#### Procedures 
