@@ -324,7 +324,8 @@ npm start
 localhost:3000/
 ```
 
-> NOTE: You should see the UI that has nothing more than `Blog App` at this point. 
+> NOTE: You should see the UI that has nothing more than `Blog App` at this point.
+ 
 ![image](https://user-images.githubusercontent.com/8760590/89736760-f8722a80-da28-11ea-9c86-faad0ea975c8.png)
 
 ---
