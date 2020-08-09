@@ -2,7 +2,7 @@
 
 ## Objectives
 - [ ] Project Setup
-
+    + issue-9
 ---
 
 ## Section 2: Lecture 10 - Project Setup 
