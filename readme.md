@@ -252,3 +252,79 @@ app.get('/posts/:id/comments', (req, res) => {
 8. Test your `post` and `get` requests using Postman
 
 ---
+
+## Section 2: Lecture 16 - React Project Setup
+#### Procedures
+
+1. Nav to the `client` folder in the dir structure and open the code editor. 
+
+```javascript
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/client
+```
+2. We have yet to install any packages on the `client` node of our `blogs` application. So first step is to install `axios` to the `client` app. 
+
+```javascript 
+npm install axios --save
+```
+
+3. Once the install of `axios` completes, run an `npm start` to start the `client` application. 
+
+```javascript 
+npm start
+```
+
+> NOTE: When you start the react application if you didn't modify any of the boilerplate code you will get a UI that renders. Also by default React will start on port 3000. So if you did nothing to the `public` or `src` folder(s) in the boiler plate you may see something like this. 
+![image](https://user-images.githubusercontent.com/8760590/89733169-d2409080-da10-11ea-8da7-8f3e1caacd28.png)
+
+4. Go into the `src` folder and delete all the content that was there per the boilerplate.
+
+> NOTE: When you do this you will be deleting the `index.js` file which rendered the boilerplate UI, so you will now see something like this via a browser. 
+![image](https://user-images.githubusercontent.com/8760590/89733218-3d8a6280-da11-11ea-85ea-b536b929fd8c.png)
+
+5. Now inside the `src` dir, lets restart by creating 2 files ... 
+
+```javascript 
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/client/src
+
+touch index.js && touch App.js
+```
+
+6. Inside of `App.js` type the following code ...
+
+```javascript 
+import React from 'react'; 
+
+export default() => { 
+    return <div>Blog app</div>; 
+};
+```
+
+7. Now switch to the `index.js` file and write the following code ...
+
+```javascript
+import React from 'react'; 
+import ReactDOM from 'react-dom'; 
+import App from './App'; 
+
+ReactDOM.render(
+     <App />, 
+     document.getElementById('root'); 
+); 
+
+8. Now go back to the `client` server and restart the application by running ... 
+```javascript 
+npm start
+```
+
+9. Go to a browser window ... 
+```javascript 
+// In URL of browser window type 
+localhost:3000/
+```
+
+> NOTE: You should see the UI that has nothing more than `Blog App` at this point. 
+![image](https://user-images.githubusercontent.com/8760590/89736760-f8722a80-da28-11ea-9c86-faad0ea975c8.png)
+
+---
