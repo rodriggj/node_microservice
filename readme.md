@@ -168,3 +168,85 @@ Nav to your terminal window for `posts` and run `npm start` at the CLI to start 
 }
 
 ---
+
+## Section 2: Lecture 13 - Implementing a `Comments` Service
+#### Procedures 
+
+1. Within the `comments` directory of our `blog` application we want to create initial boilerplate application. 
+```javascript 
+code index.js
+```
+
+2. Within `index.js` write the following ... 
+```javascript
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const { randomBytes } = require('crypto'); 
+
+const app = express(); 
+
+const PORT = 4001 || process.env.PORT; 
+
+app.use(bodyParser.json()); 
+
+app.get('/posts/:id/comments', (req, res) => {
+    res.status(200).send('GET comments route')
+});
+
+app.post('/posts/:id/comments', (req, res)=>{
+    res.status(201).send('Created comment'); 
+});
+
+app.listen(PORT, ()=>{
+    console.log(`Comments Service is up and listening on port ${PORT}`)
+})
+```
+
+3. Go to a browser and test to see if the service is running, 
+```javascript 
+// Nav to URL of browser
+localhost:4001/posts
+
+// verify you see GET comments route
+```
+
+4. Because we are not connecting this service to a database at this point we need to store our `comments` into some sort of data structure.  This data structure will be a little more complex than the `posts` data structure. We will make a data structure called `commentsByPostId` and provide a structure that looks like the following ... 
+
+```javascript 
+const commentsByPostId = {}; 
+```
+> Note: This is the structure of our `commentsByPostId` object
+![image](https://user-images.githubusercontent.com/8760590/89732101-beddf700-da09-11ea-9036-dc596e0493e2.png)
+
+5. To create this `commentsByIdStructure` go to the `POST` route and insert the following code ... 
+
+```javascript
+const commentsByPostId = {}; 
+```
+
+```javascript 
+app.post('posts/:id/comments', (req, res) => {
+    const commentId = randomBytes(4).toString('hex'); 
+    const { content } = req.body; 
+    const comments = commentsByPostId[req.params.id] || [ ]; 
+    comments.push({ id: commentId, content}); 
+    commentsByPostId[req.params.id] = comments; 
+    res.status(201).send(comments); 
+}); 
+```
+
+6. For the `GET` route insert the following code ... 
+
+```javascript 
+app.get('/posts/:id/comments', (req, res) => {
+    res.send(commentsByPostId[req.params.id] || [ ]; 
+}); 
+```
+
+7. Go to your `package.json` file and ensure to update the `scripts` node with a `start` node ... 
+
+```javascript 
+"start": "nodemon index.js"
+```
+
+8. Test your `post` and `get` requests using Postman
