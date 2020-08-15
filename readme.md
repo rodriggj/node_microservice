@@ -602,3 +602,271 @@ No visible errors on the Google Chrome Dev Tools - Console that there are no err
 
 > NOTE: Troubleshooting. While testing my Postman collection I noticed in my `client/src/PostCreate.js` file I forgot to add the word `post` after my axios call and I was not getting a 201 even though I was getting a 200. 
 
+---
+
+## Section 2: Lecture 19 - Fetching and Rendering Posts
+#### Procedures
+
+1. Nav back to `/client/src` dir and create a file called `PostList.js`. This will be the component for rendering Post objects to the UI. 
+
+```javascript 
+pwd 
+
+///Users/gabrielrodriguez/Desktop/node_microservices/blog/client/src
+
+code PostList.js
+```
+
+2. Enter boilerplate React components 
+
+```javascript 
+import React from 'react'; 
+
+export default() => {
+    return <div/>
+}
+```
+
+3. Make sure to add this component to the `App.js` file
+
+```javascript 
+// Nav to /client/src/App.js file
+
+import React from 'react'; 
+import PostCreate from './PostCreate'
+import PostList from './PostList'
+
+export default() => {
+    return <div className='container'>
+        <h1>Create Post</h1>
+        <PostCreate/>
+        <hr></hr>
+        <h1>Posts</h1>
+        <PostList/>
+    </div>;
+}
+```
+>NOTE: In your browser you can validate that the `PostList` component was added 
+![image](https://user-images.githubusercontent.com/8760590/90316998-86e02380-dee3-11ea-8f94-8a5929c4fa76.png)
+
+3. Return back to the `PostList.js` file to continue to buildout what is required to be rendered. The next thing we'll need to do is to import some hooks from React that will help us manage state and the effect desired. The state will be for the Post titles and the effect will be to only load them on page load. We will also need to include the `axios` import to make fetch calls to the Post service.  To do this modify your `PostList.js` file to include the following ... 
+
+```javascript 
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+    return (
+        <div />
+    )
+}
+```
+
+4. Now lets manage our `state` we'll need to get our posts and set them to do this we'll add this variable. 
+
+```javascript 
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+    const [posts, setPosts] = useState(); 
+    return (
+        <div />
+    )
+}
+```
+
+5. Now we have to provide an initial value for the `useState()` function. Recall from our Posts service that we are presently storing our `posts` created in an '{}' object. So we want to provide an object reference as a parameter for our `useState` function.  
+
+```javascript
+export default() => {
+    const [posts, setPosts] = useState({}); 
+    return (
+        <div />
+    )
+}
+```
+
+6. Now we need to define a function that will actually fetch the `posts` from our API. 
+
+```javascript
+export default() => {
+    const [posts, setPosts] = useState(); 
+     
+    const getPosts = async () => {
+    const res = await axios.get('http://localhost:4000/posts'); 
+   }
+
+    return (
+        <div />
+    )
+}
+```
+
+7. As a reminder, anytime we assign the response from the `axios.get` function to a variable, javascript will return an `Object` with a `data` attribute. So in this implementation we will pass the `res.data` to the `setPosts` state. 
+
+```javascript 
+export default() => {
+    const [posts, setPosts] = useState(); 
+     
+    const getPosts = async () => {
+    const res = await axios.get('http://localhost:4000/posts');
+    setState(res.data);  
+   }
+
+    return (
+        <div />
+    )
+}
+```
+8. Now that this function is put together we just need to decide now, when to call it, which is why we have the `useEffect` hook. `useEffect` can be used to run code at a specific time in the lifecycle of a component. In this case we want to run `getPosts` once, on window load. To do that we will implement like this ... 
+
+```javascript 
+export default() => {
+    const [posts, setPosts] = useState(); 
+     
+    const getPosts = async () => {
+    const res = await axios.get('http://localhost:4000/posts');
+    setState(res.data);  
+   }
+
+    useEffect(()=>{
+        getPosts();
+    }, [])
+
+    return (
+        <div />
+    )
+}
+```
+
+>NOTE: By passing no parameters, and an empty array `[]` to the `useEffect` hook we will be telling React, execute this on window load, and only run `getPosts` 1 time. 
+
+9. As a test to the developer... you may want to add a `console.log` to view the `posts` state. 
+
+```javascript 
+export default() => {
+    const [posts, setPosts] = useState(); 
+     
+    const getPosts = async () => {
+    const res = await axios.get('http://localhost:4000/posts');
+    setState(res.data);  
+   }
+
+    useEffect(()=>{
+        getPosts();
+    }, [])
+
+    console.log(posts); 
+
+    return (
+        <div />
+    )
+}
+```
+
+10. Test on the front end to see if it works ... 
+
+You can see that on window load the `GET` call for `PostList` executed and returned a `200`
+
+![image](https://user-images.githubusercontent.com/8760590/90317707-7aaa9500-dee8-11ea-8e47-8934bae7df69.png)
+
+11. You can now delete the `console.log` and let's replace it with the following . We will create a variable `renderedPosts` and assign it using a javascript `out-of-the-box`object => `Object` and use the `values()` method. `Object.values()` will take whatever parameter you pass and return an array. So if we pass `Object.values(posts)` we will return an array of post Objects that we assign to `renderedPosts`.  
+
+```javascript 
+export default() => {
+    const [posts, setPosts] = useState(); 
+     
+    const getPosts = async () => {
+    const res = await axios.get('http://localhost:4000/posts');
+    setState(res.data);  
+   }
+
+    useEffect(()=>{
+        getPosts();
+    }, [])
+
+    const renderedPosts = Object.values(posts); 
+
+    return (
+        <div />
+    )
+}
+```
+
+12. We can take it one step further by chaining the `map()` function to `Object.values(posts)` and what this will do is iterate over each object in the array, and execute a callback function we define. In this case we can specify some `JSX` that we can then rendered back to the UI. The subsequent code would look like this... 
+
+```javascript 
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+
+    const [posts, setPosts] = useState({}); 
+
+    const getPosts = async () => {
+        const res = await axios.get('http://localhost:4000/posts')
+        setPosts (res.data); 
+    }
+
+    useEffect(()=>{
+        getPosts(); 
+    }, [])
+
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div>
+                <h3>{post.title}</h3>
+            </div>
+        </div>
+    })
+
+    return (
+        <div>
+            {renderedPosts}
+        </div>
+    )
+}
+```
+
+>NOTE: Note a few things: 1. in the `map()` function we pass a var called `post` which represents each index in the `Object.values(posts)` array. 2. when we return the `JSX` (aka html with embedded javascript binding) **REACT** as a framework requires that you pass a `key` attribute. This is specific to REACT. 3. The `renderedPosts` will continue the output of all this iteration and formulation of HTML and it has to be displayed somewhere. The `where` is in the final return statement between the `<div>` tags. This will render the output of all the `JSX` code. 
+
+13. We want to format the final `div` returned to the UI with some bootstrap so we will pass a few `classNames` to the final div for formatting purposes.
+
+```javascript 
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+
+    const [posts, setPosts] = useState({}); 
+
+    const getPosts = async () => {
+        const res = await axios.get('http://localhost:4000/posts')
+        setPosts (res.data); 
+    }
+
+    useEffect(()=>{
+        getPosts(); 
+    }, [])
+
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div>
+                <h3>{post.title}</h3>
+            </div>
+        </div>
+    })
+
+    return (
+        <div className="d-row flex-row flex-wrap justify-content-between">
+            {renderedPosts}
+        </div>
+    )
+}
+```
+
+14. The resulting output will look something like this ... 
+
+![image](https://user-images.githubusercontent.com/8760590/90318198-1c7fb100-deec-11ea-8578-0fcfe57fcc8d.png)
+
