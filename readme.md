@@ -496,7 +496,7 @@ export default() => {
 
     const onSubmit = async (event) => {
         event.preventDefault(); 
-        await axios('http://localhost:4000/posts', {
+        await axios.post('http://localhost:4000/posts', {
             title
         })
         setTitle('');
@@ -518,3 +518,87 @@ export default() => {
 ![image](https://user-images.githubusercontent.com/8760590/90314932-a91e7500-ded4-11ea-9e06-e9ff97b5ae8a.png)
 
 > NOTE: If you see any other errors, check and make sure you have your `posts` service running. And also check to make sure that your axios call is to the URL has the correct port reference. 
+
+---
+
+## Section 2: Lecture 18 - Handling `CORS` Errors
+#### Procedures
+
+1. We need to install the npm `cors` package on both our `posts` and `comments` servers. We need to do so there because our `App.js` runs on our `client` server which will have a different domain than our `posts` and `comments` servers, and that is where the browser is doing a comparison of source and destination. 
+
+2. Go to `posts` terminal and install `cors`
+
+```javascript 
+pwd
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/posts
+
+// install cors package
+npm install cors --save
+```
+
+3. Go to `comments` terminal and install `cors` 
+
+```javascript 
+pwd
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/comments
+
+// install cors package
+npm install cors --save
+```
+
+4. Now start back up both your `posts` and `comments` services 
+
+```javascript 
+// go to terminal for `posts` service 
+
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/posts
+
+npm start
+
+// switch to `comments` terminal 
+
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/comments
+
+npm start
+```
+
+![image](https://user-images.githubusercontent.com/8760590/90315434-d0774100-ded8-11ea-86d3-1ac592643cb3.png)
+
+
+5. Nav to `posts/index.js` file and implement the `cors` package and middleware
+
+```javascript 
+// at the top of the file require cors
+const cors = require('cors'); 
+
+// in your middleware section (before your routes) ... implement cors middleware
+app.use(cors()); 
+```
+
+6. Nav to `comments/index.js` file and repeat process from Step 4. 
+
+```javascript 
+// at the top of the file require cors
+const cors = require('cors'); 
+
+// in your middleware section (before your routes) ... implement cors middleware
+app.use(cors()); 
+```
+
+7. Now go back to the browser and attempt the post submission again. 
+
+You can see from the Google Chrome Dev Tools - Network Tab that the post submission returned a `201`. 
+![image](https://user-images.githubusercontent.com/8760590/90316284-66619a80-dede-11ea-98f0-c5227d9ef60a.png)
+
+
+No visible errors on the Google Chrome Dev Tools - Console that there are no errors. 
+![image](https://user-images.githubusercontent.com/8760590/90315948-b0e21780-dedc-11ea-8d1a-ac29051a11c8.png)
+
+8. Finally you can go to the Postman collection, and execute a GET request and ensure that your test is visible. 
+
+![image](https://user-images.githubusercontent.com/8760590/90316311-86915980-dede-11ea-8d3e-9e88c7e5f6ff.png)
+
+> NOTE: Troubleshooting. While testing my Postman collection I noticed in my `client/src/PostCreate.js` file I forgot to add the word `post` after my axios call and I was not getting a 201 even though I was getting a 200. 
+
