@@ -330,7 +330,191 @@ localhost:3000/
 
 ---
 
-## Section 2: Lecture 17 - React Project Setup
+## Section 2: Lecture 17 - Building Post Submission
 #### Procedures
 
-1. 
+1. Nav to `client` dir, and nav to `src` dir, and create a new file called `PostCreate.js`
+
+```javascript
+pwd 
+///Users/gabrielrodriguez/Desktop/node_microservices/blog/client
+
+cd src && code PostCreate.js
+```
+
+2. In `PostCreate.js` lets create a basic form and a submit button ...
+
+```javascript
+import React from 'react'; 
+
+export default() => {
+    return <div>
+        <form>
+            <div className="form-group">
+                <label>Title</label>
+                <input className="form-control"></input>
+            </div>
+            <button className='btn btn-primary'>Submit</button>
+        </form>
+    </div>
+}
+```
+
+3. Now lets make sure to import this component into our react App. So nav to `src/App.js` and add the `PostCreate` component reference. 
+
+```javascript 
+import React from 'react'; 
+import PostCreate from './PostCreate'
+
+export default() => {
+    return <div>
+        <h1>Create Post</h1>
+        <PostCreate/>
+    </div>;
+}
+```
+
+4. Now you can go to your `localhost:3000` URL on a browser tab and see the form displayed. 
+
+![image](https://user-images.githubusercontent.com/8760590/90313906-3f4e9d00-decd-11ea-9209-0bfff5ae3670.png)
+
+5. To make the application look a little better, let's add `bootstrap` to the project by linking to the `bootstrap cdn`. 
+
+- Go to the Bootstrap homepage [here](https://getbootstrap.com/)
+- Nav within Boostrap to `downloads`. You don't need to download the files, instead simply copy the `CDN` url. [here](https://getbootstrap.com/docs/4.5/getting-started/download/)
+
+![image](https://user-images.githubusercontent.com/8760590/90313994-b84df480-decd-11ea-9a55-d406fc8fde43.png)
+
+6. Add the Bootstrap CDN reference to your Application, by naving back to the `/client/public/index.html` file and anywhere inside the `head` element paste the `CDN` code from bootstrap. 
+
+> NOTE: You don't need the `<script></script>` tag in the Bootstrap CDN reference, so you can DELETE the script from your copy paste, and just leave the `<link></link>` tag in the `<head>`. 
+
+7. You can now return to your browser and your formatting of the `posts` form should be updated because you are now leveraging the `css` styling coming from `Bootstrap` along with your element `className` attribute references. 
+
+![image](https://user-images.githubusercontent.com/8760590/90314135-a751b300-dece-11ea-9970-3268de445c6b.png)
+
+8. The last styling change we can make is to wrap the current content of the app in a `container` so we can provide some padding to the edges of our UI. Nav to the `/client/src/App.js` file, and in the parent `div` add the `className=container`. 
+
+```javascript 
+// client/src/App.js
+
+import React from 'react'; 
+import PostCreate from './PostCreate'
+
+export default() => {
+    return <div className='container'>
+        <h1>Create Post</h1>
+        <PostCreate/>
+    </div>;
+}
+```
+
+> NOTE: Now the UI is padded on the left & right edges. 
+![image](https://user-images.githubusercontent.com/8760590/90314198-26df8200-decf-11ea-9bde-298c0afb1595.png)
+
+9. Now that the UI is built, we need to add the functionality that would take the form submission and actually execute a `post` request to our `POSTS` service. To do this lets start by adding an `eventHandler` to listen for any input to the form. Nav back to `/client/src/PostCreate.js` file. 
+
+```javascript 
+// First execute some imports, modify the initial import statement as follows to add `useState`
+import React, { useState } from 'react'; 
+
+// Next import axios to provide a method to make API calls
+import axios from 'axios'
+
+// now create a var to use state 
+const [title, setTitle] = useState(' '); 
+
+// use the title state as the value for our input and add an onChange handler
+<input value = {title} onChange = { e => setTitle(e.target.value)}
+
+// add on an event listener to the form element
+<form onSubmit = {onSubmit}>
+
+// Overall code should look like this ... 
+
+import React, { useState } from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+    const [title, setTitle] = useState('');
+
+    return <div>
+        <form onSubmit = {onSubmit}>
+            <div className="form-group">
+                <label>Title</label>
+                <input value={title} onChange={e => setTitle(e.target.value)} className="form-control"></input>
+            </div>
+            <button className='btn btn-primary'>Submit</button>
+        </form>
+    </div>
+}
+```
+
+10. With step 9 complete we need to write the `onSubmit` function that will execute the activity we want to perform when the event is handled. Start by simply creating the function. 
+
+```javascript 
+const onSubmit = () => {
+
+};
+```
+11. Now by default the browser is going to try to submit the form with default functionality; we want to prevent this because we want to define the functionality of an API call to our `posts` service using axios. So to do this, start by adding an event to the `onSubmit` function, and then on the event object, call `preventDefault()` to prevent the browser default functionality. 
+
+```javascript 
+const onSubmit = (event) => {
+     event.preventDefault(); 
+};
+```
+
+12. Now lets prepare our call to the `posts` service. We want to make an `async` call without using promises &/or callbacks, so ensure the function uses `async/await` syntax, and then use axios to make a post to the `posts` service endpoint. 
+
+```javascript 
+const onSubmit = async (event) => {
+    event.preventDefault(); 
+    await axios.post('http://localhost:4000/posts', {
+             title
+        });
+};
+```
+
+13. Last house cleaning item to add to the function is after a string is input into the form (which will become the `post` title), lets blank out the form value so a subsequent request can be made from a fresh form field without having to delete the previous submit title. 
+
+```javascript 
+const onSubmit = async (event) => {
+    event.preventDefault(); 
+    await axios.post('http://localhost:4000/posts', {
+             title
+        });
+    setTitle(' '); 
+};
+
+// The completed function should look like this 
+import React, { useState } from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+    const [title, setTitle] = useState('');
+
+    const onSubmit = async (event) => {
+        event.preventDefault(); 
+        await axios('http://localhost:4000/posts', {
+            title
+        })
+        setTitle('');
+    }
+
+    return <div>
+        <form onSubmit = {onSubmit}>
+            <div className="form-group">
+                <label>Title</label>
+                <input value={title} onChange={e => setTitle(e.target.value)} className="form-control"></input>
+            </div>
+            <button className='btn btn-primary'>Submit</button>
+        </form>
+    </div>
+}
+```
+14. Now go and test. Open up the Google Chrome tools to view the `Network` tab and ensure the calls are executing as expected. NOTE... the call `WILL NOT` work. We will have to handle `cors` error. This will be addressed in the next lecture. 
+
+![image](https://user-images.githubusercontent.com/8760590/90314932-a91e7500-ded4-11ea-9e06-e9ff97b5ae8a.png)
+
+> NOTE: If you see any other errors, check and make sure you have your `posts` service running. And also check to make sure that your axios call is to the URL has the correct port reference. 
