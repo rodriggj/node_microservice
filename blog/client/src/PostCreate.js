@@ -6,10 +6,11 @@ export default() => {
 
     const onSubmit = async (event) => {
         event.preventDefault(); 
-        await axios('http://localhost:4000/posts', {
+        await axios.post('http://localhost:4000/posts', {
             title
         })
         setTitle('');
+        console.log('Post created');
     }
 
     return <div>
