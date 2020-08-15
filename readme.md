@@ -329,3 +329,8 @@ localhost:3000/
 ![image](https://user-images.githubusercontent.com/8760590/89736760-f8722a80-da28-11ea-9c86-faad0ea975c8.png)
 
 ---
+
+## Section 2: Lecture 17 - React Project Setup
+#### Procedures
+
+1. 
