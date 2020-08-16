@@ -1224,4 +1224,54 @@ export default() => {
 
 - [ ] There was nothing in this lesson other than the source code files zipped up in the event that you did not complete Lectures 10 - 21. Saved the files in the ticket and closed the ticket. 
 
---- 
+---     
+
+## Section 2: Lecture 23 - Request Minimization Strategies
+
+The application is working but there are some inefficiencies that need to be addressed. 
+
+The first inefficiency is that every time we make a post we are getting unnecessary calls to our back-end that are duplicative. 
+
+For example, for each post an individual comment call is being made for `n` number of posts. This should all be handled together, as opposed to potentially absorbing multiple api calls on a throttled capacity. 
+
+See the Google Chrome Console, for an example. We have 3 posts and for each post we are making 3 calls to our `comments` service to retrieve comments. This is inefficient and if there are throttling limits on the `comments` service we just unnecessarily burned 2 additional requests when one would have sufficed. 
+
+![image](https://user-images.githubusercontent.com/8760590/90333681-1be72900-df85-11ea-83bf-4a895ed31f53.png)
+
+Effectively we are doing this ... 
+1. For every GET `posts`, we are returning an array of `post` objects
+2. For each object in the array we are then making a GET call to the `comments` API 
+3. Assume we only had 10K calls per day allotted to us per an SLA, we would quickly burn through our call quantity to the `comments` service if our `posts` grew to scale with this type of design. 
+
+![image](https://user-images.githubusercontent.com/8760590/90333742-68caff80-df85-11ea-8c10-6b0d019548ac.png)
+
+A better design would be to condense all our posts to one request to retrieve the associated comments. 
+
+So how would we do that? 
+
+In a `Monolith` architecture this would be very easy to solve. The architecture would look something like this...
+
+![image](https://user-images.githubusercontent.com/8760590/90333820-2a821000-df86-11ea-8ee3-a09b2a4a0659.png)
+
+Here we would share the data storage mechanism for both `posts` & `comments` and we could easily have a single processing engine (or distributed) make a call to the back-end, execute a query of both `comments` & `posts` and return a single response with all data. 
+
+But in a `Microservice` architecture, this isn't so straight forward. 
+
+![image](https://user-images.githubusercontent.com/8760590/90333843-57cebe00-df86-11ea-9b92-912091eabfe7.png)
+
+If you refer back to the design principles in Microservices; We don't have the ability to `gather all` data for both services, because each service has its own data store, and the comments need to be associated with a `postId` to retrieve comments that are relevant to the post. 
+
+So we are back to evaluating our 2 communication mechanisms: 
+1. Synchronous 
+2. Asynchronous 
+
+#### A `Synchronous` Approach may look something like this: 
+
+![image](https://user-images.githubusercontent.com/8760590/90333901-db88aa80-df86-11ea-9999-7d330d8b4396.png)
+
+1. Here we have a request from the client to the backend `posts` service. 
+2. The `post` service would pass all the associated `postIds` and query the backend of the `comments` service retrieving the associated `comments`
+3. With the query complete, the `posts` service would then submit back to the client all `post` and associated `comments` in a single request. 
+
+Recall the pros/cons of this approach: 
+![image](https://user-images.githubusercontent.com/8760590/90333920-0a068580-df87-11ea-8cee-2f02b022030b.png)
