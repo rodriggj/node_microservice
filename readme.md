@@ -1,8 +1,7 @@
 # Section 2: A Mini-Microservices App
 
 ## Objectives
-- [ ] Project Setup
-- [ ] Create `Posts` Service
+- [ ] Several ... 
 ---
 
 ## Section 2: Lecture 10 - Project Setup 
