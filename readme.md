@@ -6,6 +6,7 @@
 
 ## Section 2: Lecture 10 - Project Setup 
 #### `Initial App Setup` Procedures
+
 1. Open a terminal window
 ```javascript
 mkdir blog
@@ -1555,5 +1556,45 @@ Error on the `comments` service
 
 Error on the `event-bus` service 
 ![image](https://user-images.githubusercontent.com/8760590/90336836-adfa2c00-df9b-11ea-906e-ac7db417de63.png)
+
+---
+
+## Section 2: Lecture 30 - Receiving Events
+#### Procedures
+
+Now the we can emit events we need to receive them back. In our `posts` & `comments` services from the `event-bus` so here we will start by implementing the route the the `events-bus` will call on the `posts` & `comments` service. 
+
+1. Start by nav-ing to the `client/posts/index.js` file and add a route to receive the event from the `event-bus`. 
+
+```javascript 
+app.post('/events', (req, res) => {
+    console.log('Received event:', req.body.type); 
+    res.status(200).json({message: "Event from event bus received."})
+})
+```
+
+2. Do the same to the `comments` service. Navigate to `client/comments/index.js` file and add the same route....
+
+```javascript
+app.post('/events', (req, res) => {
+    console.log('Received event:', req.body.type); 
+    res.status(200).json({message: "Event from event bus received."})
+})
+```
+
+3. Now execute a test from the front-end.
+
++ First add a `post` from the form... 
+![image](https://user-images.githubusercontent.com/8760590/90338303-ff0f1d80-dfa5-11ea-9c8e-dec5634882bb.png)
+
++ Validate that the terminal output is as intended which should be a notification that the `req.body.type` was received by the appropriate service and no errors on the other 2 services...
+
+![image](https://user-images.githubusercontent.com/8760590/90338297-f585b580-dfa5-11ea-8ca9-80151e7d662f.png)
+
++ Now create a `comment` to the post that was created on the front-end...
+![image](https://user-images.githubusercontent.com/8760590/90338490-4518b100-dfa7-11ea-8257-0e6aecc95af6.png)
+
++ Validate that the event type has changed and that there are no errors...
+![image](https://user-images.githubusercontent.com/8760590/90338507-58c41780-dfa7-11ea-92fc-207fbb6412eb.png)
 
 ---

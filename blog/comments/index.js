@@ -22,7 +22,7 @@ app.post('/posts/:id/comments', async (req, res)=>{
     const comments = commentsByPostId[req.params.id] || []; 
     comments.push({id: commentId, content})
     commentsByPostId[req.params.id] = comments;
-    await axios.post('http:localhost:4005/events', {
+    await axios.post('http://localhost:4005/events', {
         type: 'CommentCreated', 
         data: {
             id: commentId, 
@@ -32,6 +32,11 @@ app.post('/posts/:id/comments', async (req, res)=>{
     });
     res.status(201).send(comments); 
 });
+
+app.post('/events', (req, res) => {
+    console.log('Received event:', req.body.type); 
+    res.status(200).json({message: "Event from event bus received."})
+})
 
 app.listen(PORT, ()=>{
     console.log(`Comments Service is up and listening on port ${PORT}`)
