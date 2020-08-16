@@ -1030,3 +1030,181 @@ export default() => {
 
 ![image](https://user-images.githubusercontent.com/8760590/90331736-159c8100-df74-11ea-8bf5-4afe2c0c2d12.png)
 
+---
+
+## Section 2: Lecture 21 - Display Comments
+#### Procedures
+
+1. First we need to create the `CommentList` component source file, so nav to `/client/src/` and make a file called `CommentList`. 
+
+```javascript 
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/client/src
+
+code CommentList.js
+```
+
+2. Much of this code is the same that you will see in the `PostList` service that was created in `Lecture 19 - Fetching & Rendering Posts` so I will not itemize all the steps here simply indicate any relevant changes. The primary dependency here is that the `GET comments` endpoint requires an id from `PostsList`. So the crux of the `CommentList` service is to ensure we can get the `postId` from the `PostList` component. Let's start by simply creating the boiler plate code along with some import references. 
+
+```javascript
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default() => {
+
+    return (
+        <div/>
+    )
+}
+```
+
+3. We want to assume that this component will receive a `postId`, so we can updated the `default()` method with the `postId` coming from `PostList`. 
+
+```javascript
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default({postId}) => {
+
+    return (
+        <div/>
+    )
+}
+```
+
+4. With the `postId` we now have all we need to fetch `comments`, set state, handle event listeners, and render the `commentList` back to the UI. Lets start by assigning state and making an axios call. 
+
+```javascript
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default({postId}) => {
+
+    const [comments, setComments] = useState([]); 
+
+    const getComments = async () => {
+        const res = await axios.get(`http://localhost:4001/posts/${postId}/comments`, {comments})
+        setComments(res.data);
+    }
+
+    return (
+        <div/>
+    )
+}
+```
+> NOTE: When we assigned state with the `PostList` component, we initialized `useState({})` with an Object. That is because the data structured we created to store comments, was an Object. With `comments` our GET call will return an array of comments, so we need to change the initial state of `useState([])` to an array instead.
+
+5. Now we only want to call our `getComments` function on window load, so we will use the `useEffect` hook. 
+
+```javascript
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default({postId}) => {
+
+    const [comments, setComments] = useState({}); 
+
+    const getComments = async () => {
+        const res = await axios.get(`http://localhost:4001/posts/${postId}/comments`, {comments})
+        setComments(res.data);
+
+        useEffect(()=>{
+            getComments();
+        }, [])
+    }
+
+    return (
+        <div/>
+    )
+}
+```
+
+6. The last thing we have to do is `map` over our list of comments and return some `JSX` rendering back to the UI in the Post card. 
+
+```javascript
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+export default({postId}) => {
+
+    const [comments, setComments] = useState({}); 
+
+    const getComments = async () => {
+        const res = await axios.get(`http://localhost:4001/posts/${postId}/comments`, {comments})
+        setComments(res.data);
+
+        useEffect(()=>{
+            getComments();
+        }, [])
+    }
+
+    const renderComments = comments.map((comment)=>{
+        return <li key={comment.id}>
+            {comment.content}
+        </li>
+    })
+
+    return <ul>
+        {renderComments}
+    </ul>
+}
+```
+
+> NOTE: In the video, in `useEffects` hook, there is an empty array passed as an argument. I removed this array because both the Console display & Google Chrome Console were displaying a warning which resolved when I removed the empty array. 
+
+On the terminal window
+![image](https://user-images.githubusercontent.com/8760590/90332742-cf97eb00-df7c-11ea-98bd-d7bf7352d283.png)
+
+In Google Chrome Developer Tools 
+![image](https://user-images.githubusercontent.com/8760590/90332752-eb02f600-df7c-11ea-8eb3-bfafd398d58c.png)
+
+Console display when I remove the array 
+![image](https://user-images.githubusercontent.com/8760590/90332770-1dacee80-df7d-11ea-83e1-221f02dae926.png)
+
+Error is also gone from Google Chrome Developer Console.
+
+
+7. We will now go over to our `PostList` component where we will add out `CommentList` to the card. Make sure to import the `CommentList` component. Add the `CommentList` element, and ensure that you pass `postId` with data binding. 
+
+```javascript 
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+import CommentCreate from './CommentCreate';
+import CommentList from './CommentList'; 
+
+export default() => {
+
+    const [posts, setPosts] = useState({}); 
+
+    const getPosts = async () => {
+        const res = await axios.get('http://localhost:4000/posts')
+        setPosts (res.data); 
+    }
+
+    useEffect(()=>{
+        getPosts(); 
+    }, [])
+
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div className="card-body">
+                <h3>{post.title}</h3>
+                <CommentList postId={post.id}/> 
+                <CommentCreate postId={post.id}/>
+            </div>
+        </div>
+    })
+
+    return (
+        <div className="row d-row flex-row flex-wrap justify-content-between">
+            {renderedPosts}
+        </div>
+    )
+}
+```
+
+8. If you now execute a test on the front-end you should see comments load within the `posts` card as intended. The new comment form will accept input and render a new comment, but you will have to refresh page, because we did not write any reload logic into the page rendering to display the comment automatically. 
+
+![image](https://user-images.githubusercontent.com/8760590/90332848-af1c6080-df7d-11ea-8981-cdfb5e931e56.png)
+
+---
