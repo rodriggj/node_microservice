@@ -1163,6 +1163,15 @@ Console display when I remove the array
 
 Error is also gone from Google Chrome Developer Console.
 
+> NOTE: Even though you can make the error go away **DO NOT REMOVE THE ARRAY PARAM** in the `useEffect()` method. **IF YOU DO REMOVE** you will get a continual loop of calls to the `comments` service attempting to repopulate the `CommentList` component. 
+
+See example ... with the `useEffect(()=>{...})` <- **NO ARRAY**, you will have 8K calls in ~15 seconds 
+
+![image](https://user-images.githubusercontent.com/8760590/90333557-2b19a700-df84-11ea-9d85-a764c26ef3ca.png)
+
+Versus with the array as a param `useEffect()=>{...},[]` **WITH ARRAY**, you only get 3 calls, because there are 3 posts
+
+![image](https://user-images.githubusercontent.com/8760590/90333588-6320ea00-df84-11ea-99fa-fb5ccb820a41.png)
 
 7. We will now go over to our `PostList` component where we will add out `CommentList` to the card. Make sure to import the `CommentList` component. Add the `CommentList` element, and ensure that you pass `postId` with data binding. 
 
@@ -1206,6 +1215,7 @@ export default() => {
 8. If you now execute a test on the front-end you should see comments load within the `posts` card as intended. The new comment form will accept input and render a new comment, but you will have to refresh page, because we did not write any reload logic into the page rendering to display the comment automatically. 
 
 ![image](https://user-images.githubusercontent.com/8760590/90332848-af1c6080-df7d-11ea-8981-cdfb5e931e56.png)
+
 
 ---
 

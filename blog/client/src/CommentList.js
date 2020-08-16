@@ -12,7 +12,7 @@ export default({postId}) => {
 
     useEffect(()=>{
         getComments();
-    });
+    }, []);
 
     const renderComments = comments.map(comment=>{
         return <li key={comment.id}>
