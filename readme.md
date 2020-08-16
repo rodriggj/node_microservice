@@ -1445,3 +1445,53 @@ app.listen(PORT, ()=>{
 > NOTE: The code above all assumes that the POST request will succeed. There is no handling at the moment if any or all of the POST requests to the various services fails. This will be something that needs to be managed and will be addressed in later discussions. 
 
 ---
+
+## Section 2: Lecture 28 - Emitting Events
+#### Procedures
+
+1. Now that we have an `event-bus` that is emitting events to a `http://localhost:{port}/events` endpoint for all our various services we need to implement this route on our `posts`, `comments`, and TBD `query` services. Lets begin with `posts`. Nav to the `/blog/posts/index.js` file and add the axios package as well as add the `/events` route. 
+
+```javascript
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const { randomBytes } = require('crypto'); 
+const cors = require('cors');
+const axios = require('axios'); 
+const app = express(); 
+
+const PORT = 4000 || process.env.port; 
+const posts = {}; 
+
+app.use(bodyParser.json());
+app.use(cors());
+
+app.post('/posts', async (req, res) => {
+    const id = randomBytes(4).toString('hex'); 
+    const { title } = req.body; 
+    posts[id] = {
+        id, title
+    }; 
+
+    await axios.post('http://localhost:4005/events', {
+        type: 'PostCreated', 
+        data: {
+            id, title
+        }
+    });
+    
+    res.status(201).send(posts[id]);
+}); 
+
+app.get('/posts', (req, res) => {
+    res.status(200).send(posts);
+}); 
+
+app.listen(PORT, ()=>{
+    console.log(`Posts service is up and listening on port ${PORT}`)
+});
+```
+2. If you restart all the services and go back to the front end you'll see that there are no `posts`. If you submit a new post and refresh you will see you post appear on the front-end as planned. If you go to the terminal of the `event-bus` service you will see errors. This is because even thought you are now able to emit events to the `event-bus`, the `event-bus` is attempting to echo the `event` back out and the `posts` service **DOES NOT** have a `/events` endpoint within its route structure for the `event-bus` to send a successful `POST` too. We will correct this in the next lecture. For now if you are receiving `400` errors then that is the intended outcome. 
+
+![image](https://user-images.githubusercontent.com/8760590/90336282-0fb89700-df98-11ea-9d16-b8c5b9da3248.png)
+
+---
