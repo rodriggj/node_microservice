@@ -1208,3 +1208,10 @@ export default() => {
 ![image](https://user-images.githubusercontent.com/8760590/90332848-af1c6080-df7d-11ea-8981-cdfb5e931e56.png)
 
 ---
+
+## Section 2: Lecture 22 - Completed React App
+#### Comments
+
+- [ ] There was nothing in this lesson other than the source code files zipped up in the event that you did not complete Lectures 10 - 21. Saved the files in the ticket and closed the ticket. 
+
+--- 
