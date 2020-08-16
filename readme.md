@@ -1495,3 +1495,66 @@ app.listen(PORT, ()=>{
 ![image](https://user-images.githubusercontent.com/8760590/90336282-0fb89700-df98-11ea-9d16-b8c5b9da3248.png)
 
 ---
+
+## Section 2: Lecture 29 - Emitting Events Comment Creation
+#### Procedures
+
+1. Just like with the `posts` service we needed to emit an event to the `event-bus` so also, we need to emit an event when a `comment` is created. This event payload will be different than the `posts` payload, but the overall architecture and purpose is the same. Start by nav-ing to the `comments` serivce at `/blog/comment` and opening the `index.js` file. 
+
+2. In the `/blog/comments/index.js` file require `axios` and modify the `POST /posts/:id/comments` route to include logic that will emit an event to the `event-bus`. 
+
+```javascript 
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const { randomBytes } = require('crypto'); 
+const axios = require('axios');
+const cors = require('cors');
+
+const app = express(); 
+
+const PORT = 4001 || process.env.PORT; 
+const commentsByPostId = {}; 
+
+app.use(bodyParser.json()); 
+app.use(cors()); 
+
+app.get('/posts/:id/comments', (req, res) => {
+    res.send(commentsByPostId[req.params.id] || []);
+});
+
+app.post('/posts/:id/comments', async (req, res)=>{
+    const commentId = randomBytes(4).toString('hex'); 
+    const { content } = req.body; 
+    const comments = commentsByPostId[req.params.id] || []; 
+    comments.push({id: commentId, content})
+    commentsByPostId[req.params.id] = comments;
+    await axios.post('http:localhost:4005/events', {
+        type: 'CommentCreated', 
+        data: {
+            id: commentId, 
+            content, 
+            postId: req.params.id
+        }
+    });
+    res.status(201).send(comments); 
+});
+
+app.listen(PORT, ()=>{
+    console.log(`Comments Service is up and listening on port ${PORT}`)
+})
+```
+
+3. Now if you go to the front-end application, you should be able to create a `Post`, and for the post, you can also create a `Comment`. 
+
+![image](https://user-images.githubusercontent.com/8760590/90336775-447a1d80-df9b-11ea-8950-bc0c72c05ff4.png)
+
+> NOTE: Once again on your terminal for both the `event-bus` and the `comments` service you are going to get errors because we have not implemented a route on the `comments` serivce to handle the post request coming from the `event-bus` to the `POST http://localhost:{port}/events` endpoint we specified in the `event-bus` service. 
+
+Error on the `comments` service
+![image](https://user-images.githubusercontent.com/8760590/90336821-9ae75c00-df9b-11ea-874c-73bf42280a6c.png)
+
+
+Error on the `event-bus` service 
+![image](https://user-images.githubusercontent.com/8760590/90336836-adfa2c00-df9b-11ea-906e-ac7db417de63.png)
+
+---
