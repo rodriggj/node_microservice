@@ -1327,3 +1327,121 @@ The implementation would work something like this ...
 ![image](https://user-images.githubusercontent.com/8760590/90334539-92872500-df8b-11ea-8457-bf8f12d30545.png)
 
 ---
+
+## Sect 2 - Lecture 26 - Event Bus Overview
+#### Notes 
+
+![image](https://user-images.githubusercontent.com/8760590/90334937-6de07c80-df8e-11ea-8c31-5296a653dddd.png)
+
+
+The implementation we will build
+
+![image](https://user-images.githubusercontent.com/8760590/90335012-f3642c80-df8e-11ea-824d-7bcc5f13289a.png)
+
+1. Anytime a new `post` is created an event will get posted to our TBD - `Event Bus` service
+2. That event bus will then echo that event payload out to all services (including the one that emitted the event)
+3. The services that care about that event will process the event and make the subsequent data stores or business logic
+
+--- 
+
+## Section 2: Lecture 27 - A Basic Event Bus Implementation
+#### Procedures
+
+1. To start nav to the root dir of the application `blog` and make a new dir called `event-bus`, and nav to `event-bus`. 
+
+```javascript
+pwd
+///Users/gabrielrodriguez/Desktop/node_microservices/blog
+
+mkdir event-bus && cd event-bus
+```
+
+2. Generate a new `package.json` file with `npm init`
+
+```javascript 
+npm init -y
+```
+
+3. Install dependencies 
+
+```javascript
+npm install express axios --save
+
+npm install -g nodemon 
+```
+
+4. Create an `index.js` file within the `event-bus` directory
+
+```javascript
+code index.js
+```
+
+5. Implement boilerplate express app code 
+
+```javascript 
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const app = express(); 
+
+const PORT = 4005 || process.env.PORT; 
+app.use(bodyParser.json()); 
+
+app.listen(PORT, ()=>{
+    console.log(`Event-Bus Service is up and listening on port ${PORT}`)
+})
+```
+
+6. Modify `package.json` for start script 
+
+```javascript 
+{
+  "name": "event-bus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "express": "^4.17.1"
+  }
+}
+```
+
+7. Start the server to see that it boots up... 
+
+```javascript 
+npm start
+```
+
+8. Implement `event-bus` design. Recall we are simply processing the emitted event and sending post requests to all services (`posts`, `comments`, & our tbd `query service`) 
+
+```javascript 
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const axios = require('axios');
+const app = express(); 
+
+const PORT = 4005 || process.env.PORT; 
+app.use(bodyParser.json()); 
+
+app.post('/events', (req, res)=>{
+    const event = req.body; 
+    axios.post('http://localhost:4000/events',event);   //posts service
+    axios.post('http://localhost:4001/events',event);   //comments service
+    axios.post('http://localhost:4002/events',event);   //query service (TBD)
+    res.send( {eventStatus: "OK"} );
+});
+
+app.listen(PORT, ()=>{
+    console.log(`Event-Bus Service is up and listening on port ${PORT}`)
+})
+```
+
+> NOTE: The code above all assumes that the POST request will succeed. There is no handling at the moment if any or all of the POST requests to the various services fails. This will be something that needs to be managed and will be addressed in later discussions. 
+
+---
