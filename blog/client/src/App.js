@@ -3,11 +3,12 @@ import PostCreate from './PostCreate'
 import PostList from './PostList'
 
 export default() => {
-    return <div className='container'>
+    return <div className='container' style={{ marginTop:'50px' }}>
         <h1>Create Post</h1>
         <PostCreate/>
         <hr></hr>
         <h1>Posts</h1>
         <PostList/>
+
     </div>;
 }

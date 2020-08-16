@@ -870,3 +870,163 @@ export default() => {
 
 ![image](https://user-images.githubusercontent.com/8760590/90318198-1c7fb100-deec-11ea-8578-0fcfe57fcc8d.png)
 
+## Section 2: Lecture 20 - Creating Comments
+#### Procedures
+
+1. in `client/src/` dir create a new file called `CommentCreate.js`
+
+```javascript 
+pwd 
+// /Users/gabrielrodriguez/Desktop/node_microservices/blog/client/src
+
+code CommentCreate.js
+```
+
+2. In `CommentCreate.js` implement boilerplate code 
+
+```javascript
+import React from 'react'; 
+
+export default() => {
+    return <div/>
+}
+```
+
+3. Recall that a `comment` object will be associated with a `post`. Specifically the `postId`. So when we create a comment in the `CommentCreate` component we should expect to receive some `properties`that are passed in the `default()` method. We could pass a var to `default()` but we know that we only need an id so we can use destructuring and pass the propId like this...
+
+```javascript 
+import React from 'react'; 
+
+export default({propId}) => {
+    return <div></div>
+}
+```
+
+4. The component will require a form, so we can go ahead and build that into our return block `div`. 
+
+```javascript 
+import React from 'react'; 
+
+export default({postId}) => {
+    return <div>
+        <form className="form-group">
+            <label>New Comment</label>
+            <input className="form-control"></input>
+            <button className="btn btn-primary">Submit</button>
+        </form>
+    </div>
+}
+```
+
+5. Now just like the other services we need to manage a few things: 
+    + we need to manage the piece of state that will be passed in the form input
+    + we need a function that will handle the call to the `comments` service
+    + We need to add an event listener to handle the form input 
+So just like before, lets start by using the `{useState}` hook that is going to manage the state of the `input` field we created. To do this import `{useState}` from React, and set up a variable that will hold the state. We also need to assign a value for the `input` and create an event handler to listen fo when the input field has content. 
+
+```javascript
+import React, { useState } from 'react'; 
+
+export default({postId}) => {
+    const [content, setContent] = useState(''); 
+
+    return <div>
+        <form onSubmit={onSubmit} className="form-group">
+            <label>New Comment</label>
+            <input value={content} onChange={e => setContent(e.target.value)} className="form-control" ></input>
+            <br></br>
+            <div className="text-center">
+                <button className="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+}
+```
+
+6. Now lets import `axios` and write a function that will perform the call to the `comments` service to post a new comment and associate it with the correct `post`. To do this we will write a `onSubmit` function, and assign an event listener to the `form` element. The function will handle the call to create the post to the `comments` service and will use the `{postId}` that we pass in the `export default({postId})` function. Finally I inserted a `console.log()` to help identify that the function was called & to id the `postId`. 
+
+```javascript
+import React, { useState } from 'react'; 
+import axios from 'axios'; 
+
+export default({postId}) => {
+    const [content, setContent] = useState(''); 
+
+    const onSubmit = async (event) => {
+        event.preventDefault(); 
+        await axios.post(`http://localhost:4001/posts/${postId}/comments`, {
+            content
+        });
+        setContent('');
+        console.log(`Comment posted to ${postId}`)
+    }
+
+    return <div>
+        <form onSubmit={onSubmit} className="form-group">
+            <label>New Comment</label>
+            <input value={content} onChange={e => setContent(e.target.value)} className="form-control" ></input>
+            <br></br>
+            <div className="text-center">
+                <button className="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+}
+```
+
+7. Now that we have a way to create a comment, recall that each comment needs to be associated with a `post`. So in our `PostList` component, we need to call `CommentCreate` component to render the `comments` along with each associated `post` in our UI. To do this, go back to the `PostList` component (`/client/src/PostList.js`). In there we want to import our `CreateComment` component and we also want to call our `<CreateComment/>` element within our markup. 
+
+```javascript 
+// PostList.js file
+
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+import CommentCreate from './CommentCreate';
+
+export default() => {
+
+    const [posts, setPosts] = useState({}); 
+
+    const getPosts = async () => {
+        const res = await axios.get('http://localhost:4000/posts')
+        setPosts (res.data); 
+    }
+
+    useEffect(()=>{
+        getPosts(); 
+    }, [])
+
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div className="card-body">
+                <h3>{post.title}</h3>
+                <CommentCreate postId={post.id}/>
+            </div>
+        </div>
+    })
+
+    return (
+        <div className="row d-row flex-row flex-wrap justify-content-between">
+            {renderedPosts}
+        </div>
+    )
+}
+```
+
+8. Now you can test the front-end and see that for each `Post` card, you should have a form input to create & submit a `comment`. If you attempt to create a `comment` the comment will not update the UI yet, this is because we have not created a component to `list` the comment, but the form should create a `post` request with the correct `postId` and create a comment. 
+
+- You can see that the `create comment form` component renders correctly. 
+
+![image](https://user-images.githubusercontent.com/8760590/90331651-6f507b80-df73-11ea-8c19-ea19f2e6c03d.png)
+
+
+- If you were to write a comment in any one of the tiles, there should be a console log, depicting the `{postId}` of the `post` parent object. 
+
+![image](https://user-images.githubusercontent.com/8760590/90331687-b3438080-df73-11ea-8951-f527d29d5aa2.png)
+
+![image](https://user-images.githubusercontent.com/8760590/90331696-c2c2c980-df73-11ea-89ca-f9c466edbf81.png)
+
+- If we copy the `postId` from the console.log, and execute a GET request on comments in Postman, which requires a `postId` as a parameter (http://localhost:4001/posts/:id/comments) we can see the post to the comments service. 
+
+![image](https://user-images.githubusercontent.com/8760590/90331736-159c8100-df74-11ea-8bf5-4afe2c0c2d12.png)
+
