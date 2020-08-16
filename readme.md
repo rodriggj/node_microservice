@@ -1227,6 +1227,7 @@ export default() => {
 ---     
 
 ## Section 2: Lecture 23 - Request Minimization Strategies
+#### Notes
 
 The application is working but there are some inefficiencies that need to be addressed. 
 
