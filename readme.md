@@ -1598,3 +1598,135 @@ app.post('/events', (req, res) => {
 ![image](https://user-images.githubusercontent.com/8760590/90338507-58c41780-dfa7-11ea-92fc-207fbb6412eb.png)
 
 ---
+
+## Section 2: Lecture 31 - Creating the Data Query Service
+#### Procedures
+
+1. Create a new terminal window and nav to our project parent directory `/blog`, and create a directory called `query`. 
+
+```javascript 
+pwd
+// /blog
+
+mkdir query
+
+cd query
+```
+
+2. Init a new `package.json` file with and install `express` & `cors`
+
+```javascript 
+npm init -y
+
+npm install express cors body-parser --save
+
+npm install -g nodemon
+```
+
+3. Now lets create an `index.js` file and create the boilerplate code to init the service. 
+
+```javascript 
+const express = require('express'); 
+const bodyParser = require('body-parser'); 
+const cors = require('cors'); 
+const app = express(); 
+
+const PORT = 4002 || process.env.PORT; 
+app.use(bodyParser.json()); 
+app.use(cors());
+
+app.get('/posts', (req, res) => {}); 
+app.post('/events', (req, res) => {}); 
+
+app.listen(PORT, ()=>{
+    console.log(`Query service is up and listening on port ${PORT}`)
+})
+```
+
+4. Modify the `package.json` file to have a `start` script
+
+```javascipt
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+```
+
+5. Start the service with the start script 
+
+```javascript 
+npm start.  // Query service is up and running on port 4004
+```
+
+6. We need a data structure to hold `posts`, lets create this as just an Object. 
+
+```javascript 
+const posts = {}; 
+```
+
+7. Now let's work on the `app.post` route. We need to be able to handle whether or not the event that the Query service receives is either a `post` or a `comment` and create the appropriate data structure for each: 
+
+```javascript 
+app.post('/events', (req, res) => {
+    const {type, data} = req.body; 
+    
+    if(type === 'PostCreated'){
+        const {id, title} = data; 
+        posts[id] = {id, title, comments:[]}
+    }
+
+    if(type === 'CommentCreated'){
+        const {id, content, postId} = data; 
+        const post = posts[postId]; 
+        post.comments.push({id, content}); 
+    }
+}); 
+```
+
+8. The `get` route will be much simpler, we simply `GET` all posts. 
+
+```javascript 
+app.get('/posts', (req, res) => {
+    res.send(posts); 
+}); 
+```
+
+> NOTE: We may have commented out the post to port `4002` which is where this query service is listening. If so make sure to go back to the `events` service (nav to `blog/event-bus/index.js` and uncomment out the `axios.post({domain}:4002/events)` for the query service. 
+
+9. Test the service from the React front-end and validate no errors in the console for your various services. 
+
++ Front End ... created 2 different posts and 2 different comments 
+![image](https://user-images.githubusercontent.com/8760590/90775210-d17fe800-e2b5-11ea-8515-ed065e5bd7db.png)
+
++ Console Views
+![image](https://user-images.githubusercontent.com/8760590/90775385-03914a00-e2b6-11ea-8ae2-5faaeacdde06.png)
+
+10. If you got here the test was successful, but you didn't see anything that the `query` service provided. So lets just console log the data structure that the query service is assembling to see if that is being constructed correctly (the commands from the `post` route.) Modify the `app.post()` route to include a console.log
+
+```javascript
+app.post('/events', (req, res) => {
+    const {type, data} = req.body; 
+    
+    if(type === 'PostCreated'){
+        const {id, title} = data; 
+        posts[id] = {id, title, comments:[]}
+    }
+
+    if(type === 'CommentCreated'){
+        const {id, content, postId} = data; 
+        const post = posts[postId]; 
+        post.comments.push({id, content}); 
+    }
+
+    console.log(posts);
+}); 
+```
+
+11. Now test and view the terminal windows. 
+
++ Post Created
+![image](https://user-images.githubusercontent.com/8760590/90775926-ae096d00-e2b6-11ea-8a54-47799958ef4d.png)
+
++ Comment Created
+![image](https://user-images.githubusercontent.com/8760590/90775992-c24d6a00-e2b6-11ea-8924-f81390ee6c93.png)
+
+---
