@@ -1735,3 +1735,190 @@ app.post('/events', (req, res) => {
 ![image](https://user-images.githubusercontent.com/8760590/90775992-c24d6a00-e2b6-11ea-8924-f81390ee6c93.png)
 
 ---
+
+## Section 2: Lecture 33 - Using the Query Service
+#### Procedures
+
+1. Nav to the `client/src/PostList` file... 
+```javascript 
+pwd   ///Users/gabrielrodriguez/Desktop/node_microservices/blog/client/src
+```
+
+2. Within this file we are making a request to the `posts` service on port `4000`, and retrieving our list of posts to render via the React app. We need to update this to make a call to our query service which is now listening on port `4002`; the route is still /`posts`. So we need to modify the file like this ... 
+
+```javascript 
+// Was
+        const getPosts = async () => {
+        const res = await axios.get('http://localhost:4000/posts')
+        setPosts (res.data); 
+    }
+
+// IS 
+        const getPosts = async () => {
+        const res = await axios.get('http://localhost:4002/posts')
+        setPosts (res.data); 
+    }
+```
+
+3. Insert a `console.log()` to view the data that comes back from the change in Step 2. 
+
+```javascript 
+        const getPosts = async () => {
+        const res = await axios.get('http://localhost:4002/posts'); 
+        console.log(res.data);
+        setPosts (res.data); 
+    }
+```
+
+Everything appears to still be working. And your console log shows what it should. 
+![image](https://user-images.githubusercontent.com/8760590/90983223-c7661f80-e529-11ea-8522-6ba5f0a2d40f.png)
+
+The only `PROBLEM` is if you look at the `Network` tab, you don't see the `query` service being called. The `React` app is still calling the `Post` & `Comments` service directly to render data and this is not what we want ... we want a single request to be coming from `query` service. 
+
+![image](https://user-images.githubusercontent.com/8760590/90983315-6428bd00-e52a-11ea-8683-e9749421dea1.png)
+
+4. To fix this, let's start by scrolling down on the `blog/client/src/PostList.js` file, and we need to modify the `renderedPosts` variable. 
+
+Recall, 
+1. `renderedPosts` was initially created when we used the `getPosts` function, which called the the `posts` service, to retrieve a list of `post` Objects. (_With Step 3, we are no longer calling the `posts` service directly, we are now calling the `query` service, which already has both `posts` and `comments`_). 
+2. We received the `posts` in the `PostList` component, by using the `useState` hook to set the `posts` in this component. (_This can remain unchanged because we still want `posts` we are simply getting a enhanced `post` object from the `query` service_)
+3. With this list of posts now, we created a variable called `renderedPosts` by using the `Object.values()` function and passing the returned `posts`. This function returns an array.  (_This can remain the same_). 
+4. We then called the `map` function, and a callback, to create tiles, for each `post` object in our array. (_This can remain the same_). 
+
+We did all of this because we had a `CommentList` component in our tile body. The `CommentList` component used the `comments` service to retrieve comments. The comments service required a `postId` to know which comments were associated with which post. _(GET /posts/:postId/comments)_. We therefore had to pass to the `CommentsList` component a `postId` in the data binding so that `CommentList` could create its list. 
+
+The `CommentList` component no longer needs the `postId` to merry up the associated `comments`. This is now done through the `query` service, and the `getPosts` function retrieves a `post` Object with a `comment` attribute. Therefore, we can now update the `CommentList` to simply call `posts.comment`, instead of passing `postId` and letting `CommentList ` handle the `joining` of posts and comments it previously had too. 
+
+```javascript 
+// Was
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div className="card-body">
+                <h3>{post.title}</h3>
+                <CommentList postId={post.id}/> 
+                <CommentCreate postId={post.id}/>
+            </div>
+        </div>
+    })
+
+// Changed
+    const renderedPosts = Object.values(posts).map(post => {
+        return <div className="card" style={{ width: '30%', marginBottom:'20px' }} key={post.id}>
+            <div className="card-body">
+                <h3>{post.title}</h3>
+                <CommentList comments={post.comments}> 
+                <CommentCreate postId={post.id}/>
+            </div>
+        </div>
+    })
+```
+
+5. Now, that we fixed the data binding in `CommentList` component in the `PostList.js` file, we need to modify the logic in `CommentList` and ensure an additional call to `comments` service is no longer needed. 
+
+```javascript 
+// Was 
+export default({postId}) => {
+    const [comments, setComments] = useState([]); 
+
+    const getComments = async () => {
+        const res = await axios.get(`http://localhost:4001/posts/${postId}/comments`)
+        setComments(res.data);
+    }
+
+    useEffect(()=>{
+        getComments();
+    }, []);
+
+    const renderComments = comments.map(comment=>{
+        return <li key={comment.id}>
+            {comment.content}
+        </li>
+    });
+}
+
+// We no longer need to
+// 1. manage the state of comments (delete useState hook)
+// 2. fetch comments (delete axios call)
+// 3. render results to the UI (delete useEffect hook)
+
+// Changed
+export default({postId}) => {
+
+    const renderComments = comments.map(comment=>{
+        return <li key={comment.id}>
+            {comment.content}
+        </li>
+    });
+
+    return <ul>
+        {renderComments}
+    </ul>
+}
+```
+
+6. On the same file as Step 5, we also no longer need the `useState or useEffect` imports, or require `axios`
+
+```javascript
+// Was
+import React, { useState, useEffect }from 'react'; 
+import axios from 'axios'; 
+
+// Changed
+import React from 'react'; 
+```
+
+7. Finally we need to update our reference to params passed to our `export default()` function. 
+
+```javascript 
+// Was
+export default({postId}) => {
+
+    const renderComments = comments.map(comment=>{
+        return <li key={comment.id}>
+            {comment.content}
+        </li>
+    });
+
+    return <ul>
+        {renderComments}
+    </ul>
+}
+
+// Changed
+export default({comments}) => {
+
+    const renderComments = comments.map(comment=>{
+        return <li key={comment.id}>
+            {comment.content}
+        </li>
+    });
+
+    return <ul>
+        {renderComments}
+    </ul>
+}
+```
+
+8. Now, with all that done, we should expect to see the following things: 
++ 1. The services are still running as designed. 
+   + `posts` are still created by the `Post` service, 
+   + `comments` are still created by the `Comment` service
+
++ 2. If we are just retrieving data (_not creating a new post or comment_) there should only be 1 call in our network tab. 
+   + (_recall previously we saw a comment request for every post generated_). 
+   + This is a wasteful use of API calls and can reach service limits at scale
+
++ 3. If a `post` or `comments` service goes down, the `query` service will still render content to the UI
+   + You may not be able to create new content 
+   + But the content created can still be rendered
+
+Refresh the React app, and no errors. 
+![image](https://user-images.githubusercontent.com/8760590/90984537-cc7b9c80-e532-11ea-993a-dfee65a472ae.png)
+
+Create a Post
+![image](https://user-images.githubusercontent.com/8760590/90984569-fd5bd180-e532-11ea-9166-cce62ce834f6.png)
+
+Create a Comment 
+![image](https://user-images.githubusercontent.com/8760590/90984681-c508c300-e533-11ea-91e4-3df00bae4397.png)
+
+---
