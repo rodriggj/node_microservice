@@ -1,6 +1,7 @@
 const express = require('express');
 const redis = require('redis');
 const app = express();
+const process = require('process')
 const client = redis.createClient({
     //we can reference this by name because we are using docker-compose, otherwise this would be an endpoint
     host: 'redis-server',
@@ -11,6 +12,7 @@ const PORT = 4000;
 client.set('visits', 0);
 
 app.get('/', (req, res) => {
+    process.exit(0);
     client.get('visits', (err, visits) => {
         res.send('Number of visits is ' + visits);
         client.set('visits', parseInt(visits) + 1);
