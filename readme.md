@@ -245,3 +245,40 @@ But we will immediately run into 2 issues that we need to resolve:
 
 2. Where is the `nginx` image coming from? 
 
+20. We are going to build a `Multi-Step Docker Build` to support the fact that we want to keep the `node:alpine` container image while in `non-prod` but when deploying to prod have a `nginx` image. So we want a process that looks similar to this: 
+
+<p align="center">
+    <image src="https://user-images.githubusercontent.com/8760590/112226117-61429780-8bf3-11eb-9388-34d8e612f111.png" width="450px">
+</p>
+
+21. To build our `multi-step` container we are going to create a `Dockerfile` which will execute the production build phase, and inherit the `build` directory files that were built in our build phase. 
+
+```javascript
+code Dockerfile
+```
+
+```javascript
+FROM node:alpine
+WORKDIR '/app'
+COPY ./package.json .
+RUN npm install
+COPY ./ ./
+RUN npm run build
+
+FROM nginx
+COPY --from=0 /app/build /usr/share/nginx/html
+```
+
+> __NOTE:__ The 2 blocks of code, each block corresponding to a build phase. The first phase or `phase 0` is built first with an image of `node:alpine`. The second block is built using the build files created in phase 0, but this time is deploying to a production grade server image `nginx`. 
+
+22. Now we need to execute our build and run processes 
+
+```
+docker build . 
+```
+
+```
+docker run -p 8080:80 rodriggj/frontend:1.4 
+```
+
+23. Now nav to a browser and execute a request to `localhost:8080`, and you should see the react application. 
