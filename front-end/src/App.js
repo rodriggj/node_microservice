@@ -7,7 +7,13 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          This is your code running from the container.
+        </p>
+        <p>
+          This is checking to see if you volume is mapped to the local directory structure.
+        </p>
+        <p>
+          This is coming from docker-compose
         </p>
         <a
           className="App-link"

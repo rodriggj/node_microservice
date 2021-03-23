@@ -21,4 +21,94 @@ npx create-react-app front-end
 | `npm run test`  | Runs tests associated with the project                       |   
 | `npm run build` | Builds a __production__ version of the application           |  
 
+3. Run the `npm run build` command, and you will see a new dir structure appear within the `front-end` root folder. 
+
+4. As a child to the `front-end` folder create a `Dockerfile`, but specify a `.dev` extension to the file. This will ensure that it will only be applicable if not running in a prod environment. 
+
+> __NOTE:__ We will create a `Dockerfile` for production as well and in that file, there will be __NO__ extension associated with the Dockerfile. In that `Dockerfile` we will configure the Dockerfile to run `npm run build` to create a production environment. 
+
+```javascript
+code Dockerfile.dev
+```
+
+5. Open the `Dockerfile.dev` and input the following to configure the container build that will host the React application `front-end`.
+
+```javascript
+# Specify the root image
+FROM node:alpine
+
+# Node requires a WORDIR
+WORKDIR '/app'
+
+# COPY package.json to establish build dependencies
+COPY ./package.json ./
+
+# Run the npm install command to configure dependecies
+RUN npm install
+
+# Copy all associated files in the directory structure to the container
+COPY ./ ./
+
+# Run the initial start up command
+CMD ["npm", "run", "start"]
+```
+
+6. Now we can run the Docker file. Recall that 1. we will first need to `build` the image. & 2. then `run` the image. Recall also that when we executed the build commmand, we would 1. navigate to the root directory where the Dockerfile was and we would execute the following command: 
+
+```
+docker build .
+```
+
+> __NOTE:__ Docker would look for the Dockerfile, and execute the build against this configuration. But now, we don't have a `Dockerfile`, we have a `Dockerfile.dev`, and if you run the `docker build .` command, Docker renders an error. This is b/c Docker is looking for a file called `Dockerfile`. To overcome this error we need to speciy a different command using the file flag like so.
+
+```
+docker build -f Dockerfile.dev .
+```
+
+7. When the build completes you will see that you have `duplicate dependencies`. If you look in you current dir structure, you will see that when you used `npx create-react-app` the `cra-template` created a folder called `node_modules` for you, which is where the dependenices for the react app are installed. But recall also in the `Dockerfile.dev` you also specified a `npm install` command which reads the `package.json` files and installs all the `node_modules` in the container. Then you copy the content of the local file structure to the container creating duplicate copies of the `node_modules` files. This is an example of 1. inflating your container with unnneeded files, & 2. installing duplicate dependencies. You `do not` need to do this. Delete the `node_modules` file in your local directory, and re-build the contianer image. 
+
+8. Now build the container image
+
+```
+docker build -f Dockerfile.dev -t rodriggj/frontend:1.3
+```
+
+9. Upon completion of a successful build of the container image, push the build to the docker hub
+
+```
+docker push rodriggj/frontend:1.3
+```
+
+10. Run the container image ensuring to supply a port forwarding configuration
+
+```
+docker run -p 3000:3000 rodriggj/frontend:1.3
+```
+
+11. SSH into the running container to see dir structure by opening another terminal window and executing the exec command
+
+```
+docker ps //copy the container image id
+docker exec -it {container_image_id} sh
+```
+
+12. In order to prevent things like constantly having to rebuild and re-run an image, Docker allows you to use `volumes` to map directories from your local file snapshot to the container image. To set up a snapshot the syntax is as follows: 
+
+```
+docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app <image_id>
+```
+
+> __NOTE:__ The second tag `-v $(pwd):/app` is working just like our port mapping syntax. You are using the `-v` flag to specify a that you want the present working directory file path `$(pwd)` on your local, to be mapped `:` to the working directory you specified in the Dockerfile which in this case is `/app` in the container. This will mean that when a file within your `pwd` path gets changed, the container is simply mapped (aka binded) to that local directory. 
+
+> __NOTE:__ The first tag is there because if you recall in the duplicate dependencies discussion, we deleted the `node_modules` folder that was created on our local when we ran `npx create-react-app front-end`. But we do need this folder b/c the contianer volume is trying to refernence a `node_modules` folder that is no longer there (b/c we deleted it). To do this we can once again use the `-v` tag, and instead of using a colon which indicates mapping of 2 folders, here we want the volume simply to contain a folder (not mapped) ... so we omit a `:` and simply specify the file path we want in the container `-v /app/node_modules`. 
+
+13. Recall that we don't like to execute commands at the CLI. These should be automated to make `docker run` a consistent execution each time. Not to mention the CLI command is getting kind of long. To fix this we are going to once again use `docker-compose`. To do this we need a `docker-compose.yml` file. Lets create one and populate it with our automation. Make sure you are in the `frontend` dir and run ... 
+
+```
+code docker-compose.yml
+```
+
+14. Within the `docker-compose.yml` file write the following: 
+
+```
 

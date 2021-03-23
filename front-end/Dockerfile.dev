@@ -1,0 +1,17 @@
+# Specify the root image
+FROM node:alpine
+
+# Node requires a WORDIR
+WORKDIR '/app'
+
+# COPY package.json to establish build dependencies
+COPY ./package.json ./
+
+# Run the npm install command to configure dependecies
+RUN npm install
+
+# Copy all associated files in the directory structure to the container
+COPY ./ ./
+
+# Run the initial start up command
+CMD ["npm", "run", "start"]
