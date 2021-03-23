@@ -111,4 +111,33 @@ code docker-compose.yml
 14. Within the `docker-compose.yml` file write the following: 
 
 ```
+version: '3.9'
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+```
+
+15. With the `docker-compose.yml` file completed, we can now use `docker-compose` to run our commands that formerly need to be completed at the CLI. Now we can run all these commands by simply calling the following...
+
+
+```
+docker-compose up
+```
+
+> __NOTE:__ You can validate that the volumes are mapped correctly by making a change to the `src/App.js` file and checking that the running app on `localhost:3000` is updating. 
+
+> __NOTE:__ You could be asking if we mapped the volumes do we still need to have teh `COPY ./ ./` statement in the `Dockerfile.dev` manifest. The answer is it is optional, but the recommendation is to leave it as it is a small impact to performance and if you decide to stop using `docker-compose` at some point the Dockerfile still will execute a `COPY` command.
+
+16. Lets execute the `npm run test` command on our container by executing an override command on the `docker run` command.
+
+```
+docker run rodriggj/frontend:1.3 npm run test
+```
 
