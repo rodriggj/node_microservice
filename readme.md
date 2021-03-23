@@ -139,5 +139,41 @@ docker-compose up
 
 ```
 docker run rodriggj/frontend:1.3 npm run test
+or 
+docker run -it rodriggj/frontend:1.3 npm run test
+```
+> __NOTE:__ When we override the docker run command and execute our test you can see that the `Tests` ran are 1. You can validate this by going to `src/App.test.js` file in our dir structure and you can see that there is 1 test. But what if we want to add tests to our container?
+
+```javascript
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
 ```
 
+17. To add additional tests to a running container we can do the following: 1. add a second test to `src/App.test.js` 2. run the container 3. open a second terminal and run the following: 
+
+```javascript
+// in src/App.test.js copy the test and paste a second test
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+```
+
+```javascript
+// run the container
+docker-compose up
+```
+
+```javascript
+// open a second terminal session and enter
+docker ps   //run this command to get the image_id of the running container
+docker exec -it <image_id> npm run test   //you should see 2 tests ran
+```
+
+18. There is a another way to execute this process, which is to _attach_ a process to the existing `web` service in our `docker-compose.yml` file that will be specific to our `npm run test` command. We would want to do this b/c the volume mapping is already configured. 
+
+> __NOTE:__ Realize that the `npm run start` to build the `web` service to deploy our React app is a different than a service that would initiate a `npm run test`. 
