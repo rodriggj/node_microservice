@@ -174,6 +174,33 @@ docker ps   //run this command to get the image_id of the running container
 docker exec -it <image_id> npm run test   //you should see 2 tests ran
 ```
 
-18. There is a another way to execute this process, which is to _attach_ a process to the existing `web` service in our `docker-compose.yml` file that will be specific to our `npm run test` command. We would want to do this b/c the volume mapping is already configured. 
+18. There is a another way to execute this process, which is to build an additional service in our `docker-compose.yml` file. Modify the file by adding the following: 
 
-> __NOTE:__ Realize that the `npm run start` to build the `web` service to deploy our React app is a different than a service that would initiate a `npm run test`. 
+
+```yaml
+version: '3.9'
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+  tests:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["npm", "run", "tests"]
+```
+
+> __NOTE:__ Realize that the `npm run start` to build the `web` service to deploy our React app is a different than a service that would initiate a `npm run test`. Now when we run `docker-compose up` we will be instantiating a container used for the `web` service and another container used for the `tests` service.
+
+```javascript 
+docker-compose up --build
+```
