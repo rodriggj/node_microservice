@@ -204,3 +204,5 @@ services:
 ```javascript 
 docker-compose up --build
 ```
+
+> __RESULTS:__ Here you see that the `service` config in the .yml file will render a similar result to the `docker exec` approach. Both approaches have pros/cons as to how to effect the test suite. Pick one and move on. 
