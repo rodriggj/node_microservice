@@ -225,20 +225,20 @@ docker exec -it <image_id> sh
 19. Now that we've seen how to get `npm run start` which is our dev environment, and `npm run test` which are our test cases, we now need to configure our container to something like this. Where we will use a production server to serve our `index.html` file, and `main.js` files to the web browser from the container. 
 
 <p align="center">
-    <image src="https://user-images.githubusercontent.com/8760590/112224064-67834480-8bf0-11eb-863a-0a33fbe2d022.png" width="450">
+    <image src="https://user-images.githubusercontent.com/8760590/112224064-67834480-8bf0-11eb-863a-0a33fbe2d022.png" width="450" height="auto">
 </p>
 
 To do this we need to create a new `Dockerfile`. Recall that our `Dockerfile.dev` only initiated a `non-production webserver`, but for our production env we need a beefier server to handle production `req/res` cycles for our web application. 
 
 To accomplish this task we will follow a flow similar to the one below: 
 <p align="center">
-    <image src="https://user-images.githubusercontent.com/8760590/112224647-2c354580-8bf1-11eb-9bcd-5d95b04361ca.png" width="450">
+    <image src="https://user-images.githubusercontent.com/8760590/112224647-2c354580-8bf1-11eb-9bcd-5d95b04361ca.png" width="450" height="auto">
 </p>
 
 But we will immediately run into 2 issues that we need to resolve: 
 
 <p align="center">
-    <image src="https://user-images.githubusercontent.com/8760590/112224754-5edf3e00-8bf1-11eb-96b6-754583b0ef7e.png" width="450px">
+    <image src="https://user-images.githubusercontent.com/8760590/112224754-5edf3e00-8bf1-11eb-96b6-754583b0ef7e.png" width="450px" height="auto">
 </p>
 
 1. We already created the needed dependencies when we ran `npm run build` and they are all captured in the `build` directory. We don't want to create another series of dependencies in our container and create our `duplicate resources` problem we had before. 
