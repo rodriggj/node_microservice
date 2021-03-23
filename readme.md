@@ -238,7 +238,7 @@ To accomplish this task we will follow a flow similar to the one below:
 But we will immediately run into 2 issues that we need to resolve: 
 
 <p align="center">
-    <image src="https://user-images.githubusercontent.com/8760590/112224754-5edf3e00-8bf1-11eb-96b6-754583b0ef7e.png" width="450px">
+    <image src="https://user-images.githubusercontent.com/8760590/112224754-5edf3e00-8bf1-11eb-96b6-754583b0ef7e.png" width="450">
 </p>
 
 1. We already created the needed dependencies when we ran `npm run build` and they are all captured in the `build` directory. We don't want to create another series of dependencies in our container and create our `duplicate resources` problem we had before. 
@@ -248,7 +248,7 @@ But we will immediately run into 2 issues that we need to resolve:
 20. We are going to build a `Multi-Step Docker Build` to support the fact that we want to keep the `node:alpine` container image while in `non-prod` but when deploying to prod have a `nginx` image. So we want a process that looks similar to this: 
 
 <p align="center">
-    <image src="https://user-images.githubusercontent.com/8760590/112226117-61429780-8bf3-11eb-9388-34d8e612f111.png" width="450px">
+    <image src="https://user-images.githubusercontent.com/8760590/112226117-61429780-8bf3-11eb-9388-34d8e612f111.png" width="450">
 </p>
 
 21. To build our `multi-step` container we are going to create a `Dockerfile` which will execute the production build phase, and inherit the `build` directory files that were built in our build phase. 
