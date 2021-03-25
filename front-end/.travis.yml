@@ -3,7 +3,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t rodriggj/frontend -f ./frontend/Dockerfile.dev .
+  - docker build -t rodriggj/frontend -f ./front-end/Dockerfile.dev .
 
 script: 
   - docker run -e CI=true rodriggj/frontend npm run test -- --coverage
