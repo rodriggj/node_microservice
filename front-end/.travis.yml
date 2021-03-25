@@ -4,7 +4,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t rodriggj/frontend:1.4 -f Dockerfile.dev .
+  - docker build -t rodriggj/frontend -f Dockerfile.dev .
 
 script: 
-  - docker run -e CI=true rodriggj/frontend:1.4 npm run test
+  - docker run rodriggj/frontend -e CI=true npm run start
